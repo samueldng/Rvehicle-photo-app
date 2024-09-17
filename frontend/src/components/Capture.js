@@ -69,4 +69,4 @@ function Capture() {
   );
 }
 
-export default Capture; // Corrigido para exportar o componente corretamente
+export default Capture;

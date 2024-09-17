@@ -7,7 +7,7 @@ function Done() {
   const navigate = useNavigate();
 
   function handleDone() {
-    navigate('/home'); // Atualizado para useNavigate
+    navigate('/home');
   }
 
   return (
