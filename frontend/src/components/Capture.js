@@ -1,8 +1,7 @@
 // frontend/src/components/Capture.js
 import React, { useState, useRef } from 'react';
-import { Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import { Button, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-
 
 function Capture() {
   const [step, setStep] = useState(1);
@@ -11,7 +10,6 @@ function Capture() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
-
 
   const startCamera = () => {
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -35,7 +33,7 @@ function Capture() {
     if (step < 5) {
       setStep(step + 1);
     } else {
-      history.push('/review');
+      navigate('/review');
     }
   };
 
@@ -71,4 +69,4 @@ function Capture() {
   );
 }
 
-export default Capture;
+export default Capture; // Corrigido para exportar o componente corretamente
