@@ -1,9 +1,12 @@
-import React from 'react';
+import React from 'react'; 
 import { Container, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 
 function Done() {
+  const navigate = useNavigate(); // Cria a função de navegação
+
   function handleStartNewConference() {
-    window.location.href = 'http://localhost:3001/'; // Redireciona para a URL específica
+    navigate('/'); // Redireciona para a rota raiz da aplicação
   }
 
   return (

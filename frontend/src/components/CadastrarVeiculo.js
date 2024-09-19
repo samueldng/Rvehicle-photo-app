@@ -19,7 +19,7 @@ const CadastrarVeiculo = () => {
       km,
       ultimaRevisao,
     };
-    
+
     console.log('Veículo cadastrado:', veiculo);
     // Aqui você pode adicionar a lógica para salvar os dados do veículo, por exemplo, enviar para uma API
 
