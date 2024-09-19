@@ -7,7 +7,7 @@ const Home = () => {
 
   return (
     <Container className="d-flex flex-column align-items-center justify-content-center vh-100 bg-light p-4">
-      <h1 className="text-center mb-4">Bem-vindo ao Aplicativo de Fotos de Veículo</h1>
+      <h1 className="text-center mb-4">Bem-vindo ao Sistema de Gestão de Veículos!</h1>
       <Row className="w-100">
         <Col className="mb-4" xs={12} md={6}>
           <Button

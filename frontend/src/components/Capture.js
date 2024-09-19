@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Container, Row, Col } from 'react-bootstrap';
+import { Button, Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function Capture() {
   const [step, setStep] = useState(1);
   const [photo, setPhoto] = useState(null);
   const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
@@ -21,12 +23,18 @@ function Capture() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const constraints = {
+        video: { facingMode: { exact: 'environment' } } // Preferir a câmera traseira
+      };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = stream;
       videoRef.current.play();
+      setLoading(false);
+      setError(null); // Limpa qualquer erro anterior
     } catch (err) {
       console.error('Erro ao acessar a câmera:', err);
-      alert('Não foi possível acessar a câmera. Verifique as permissões.');
+      setError('Não foi possível acessar a câmera. Verifique as permissões.');
+      setLoading(false);
     }
   };
 
@@ -68,6 +76,7 @@ function Capture() {
   return (
     <Container className="mt-5">
       <h2 className="text-center mb-4">Passo {step}: {instructions[step - 1]}</h2>
+      {error && <Alert variant="danger">{error}</Alert>}
       <Row className="justify-content-center">
         <Col xs={12} md={8} lg={6}>
           <div className="position-relative">
@@ -79,10 +88,17 @@ function Capture() {
             ></video>
           </div>
           <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }} />
-          <div className="mt-3 d-flex flex-column flex-md-row justify-content-between">
-            <Button variant="secondary" onClick={startCamera} className="mb-2 mb-md-0">Iniciar Câmera</Button>
-            <Button variant="primary" onClick={capturePhoto}>Capturar Foto</Button>
-          </div>
+          {loading ? (
+            <div className="text-center mt-3">
+              <Spinner animation="border" />
+              <p>Carregando câmera...</p>
+            </div>
+          ) : (
+            <div className="mt-3 d-flex flex-column flex-md-row justify-content-between">
+              <Button variant="secondary" onClick={startCamera} className="mb-2 mb-md-0" disabled={loading}>Iniciar Câmera</Button>
+              <Button variant="primary" onClick={capturePhoto} disabled={loading}>Capturar Foto</Button>
+            </div>
+          )}
           {photo && (
             <div className="mt-3 text-center">
               <h3 className="text-lg font-semibold">Foto Capturada</h3>
