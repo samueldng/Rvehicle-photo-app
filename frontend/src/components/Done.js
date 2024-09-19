@@ -1,19 +1,17 @@
-// frontend/src/components/Done.js
 import React from 'react';
 import { Container, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 
 function Done() {
-  const navigate = useNavigate();
-
-  function handleDone() {
-    navigate('/home');
+  function handleStartNewConference() {
+    window.location.href = 'http://localhost:3001/'; // Redireciona para a URL específica
   }
 
   return (
     <Container className="text-center mt-5">
-      <h2>Todas as fotos foram tiradas com sucesso!</h2>
-      <Button variant="primary" onClick={handleDone}>Voltar para o Início</Button>
+      <h2 className="text-2xl font-bold mb-4">Todas as fotos foram tiradas com sucesso!</h2>
+      <Button variant="primary" onClick={handleStartNewConference} className="mt-3">
+        Iniciar Nova Conferência de Veículo
+      </Button>
     </Container>
   );
 }

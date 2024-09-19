@@ -1,5 +1,4 @@
-// frontend/src/components/Capture.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button, Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,13 +10,24 @@ function Capture() {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
-  const startCamera = () => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      })
-      .catch(err => console.error('Erro ao acessar a câmera:', err));
+  const instructions = [
+    "Tire a foto da frente do veículo",
+    "Tire a foto da lateral direita do veículo",
+    "Tire a foto da lateral esquerda do veículo",
+    "Tire a foto da traseira do veículo",
+    "Tire a foto do condutor e passageiro",
+    "Tire a foto dos km do veículo"
+  ];
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+    } catch (err) {
+      console.error('Erro ao acessar a câmera:', err);
+      alert('Não foi possível acessar a câmera. Verifique as permissões.');
+    }
   };
 
   const capturePhoto = () => {
@@ -28,12 +38,15 @@ function Capture() {
   };
 
   const savePhoto = () => {
-    setPhotos([...photos, photo]);
-    setPhoto(null);
-    if (step < 5) {
-      setStep(step + 1);
-    } else {
-      navigate('/review');
+    if (photo) {
+      const updatedPhotos = [...photos, photo];
+      setPhotos(updatedPhotos);
+      setPhoto(null);
+      if (step < instructions.length) {
+        setStep(step + 1);
+      } else {
+        navigate('/review', { state: { photos: updatedPhotos } });
+      }
     }
   };
 
@@ -42,24 +55,41 @@ function Capture() {
     startCamera();
   };
 
+  useEffect(() => {
+    startCamera();
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    };
+  }, []);
+
   return (
-    <Container className="text-center mt-5">
-      <Row>
-        <Col>
-          <h2>Passo {step}: Tire a foto</h2>
-          <video ref={videoRef} width="640" height="480" style={{ border: '1px solid black' }}></video>
-          <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }}></canvas>
-          <div className="mt-3">
-            <Button variant="secondary" onClick={startCamera}>Iniciar Câmera</Button>
-            <Button variant="primary" onClick={capturePhoto} className="ml-2">Capturar Foto</Button>
+    <Container className="mt-5">
+      <h2 className="text-center mb-4">Passo {step}: {instructions[step - 1]}</h2>
+      <Row className="justify-content-center">
+        <Col xs={12} md={8} lg={6}>
+          <div className="position-relative">
+            <video
+              ref={videoRef}
+              className="w-100 h-auto border border-dark"
+              autoPlay
+              playsInline
+            ></video>
+          </div>
+          <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }} />
+          <div className="mt-3 d-flex flex-column flex-md-row justify-content-between">
+            <Button variant="secondary" onClick={startCamera} className="mb-2 mb-md-0">Iniciar Câmera</Button>
+            <Button variant="primary" onClick={capturePhoto}>Capturar Foto</Button>
           </div>
           {photo && (
-            <div className="mt-3">
-              <h3>Foto Capturada</h3>
-              <img src={photo} alt="Captura" style={{ width: '320px', height: '240px' }} />
+            <div className="mt-3 text-center">
+              <h3 className="text-lg font-semibold">Foto Capturada</h3>
+              <img src={photo} alt="Captura" className="img-fluid border border-gray-300" />
               <div className="mt-2">
-                <Button variant="success" onClick={savePhoto}>Confirmar Foto</Button>
-                <Button variant="danger" onClick={startNewCapture} className="ml-2">Tirar Foto Novamente</Button>
+                <Button variant="success" onClick={savePhoto} className="mr-2">Confirmar Foto</Button>
+                <Button variant="danger" onClick={startNewCapture}>Tirar Foto Novamente</Button>
               </div>
             </div>
           )}

@@ -1,25 +1,24 @@
-// src/App.js
 import React, { useState } from 'react';
 import CameraCapture from './components/CameraCapture';
-import ReviewPhoto from './components/ReviewPhoto';
 import PhotoSummary from './components/PhotoSummary';
-import { Container } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
     const [step, setStep] = useState(0);
     const [photos, setPhotos] = useState([]);
+    const navigate = useNavigate(); // Hook para navegação
 
     const handleCapture = (photo) => {
-        setPhotos([...photos, photo]);
-        if (photos.length + 1 >= 5) {
-            setStep(2); // Move para a tela de resumo se 5 fotos forem tiradas
+        setPhotos((prevPhotos) => [...prevPhotos, photo]);
+
+        // Verifica se o número de fotos atingiu o limite de 6
+        if (photos.length + 1 >= 6) {
+            setStep(2); // Mover para a tela de resumo
         } else {
             setStep(1); // Continuar tirando fotos
         }
-    };
-
-    const handleConfirm = () => {
-        setStep(2); // Mostrar resumo
     };
 
     const handleRestart = () => {
@@ -31,12 +30,24 @@ const App = () => {
         <Container className="mt-5">
             {step === 0 && (
                 <div className="text-center">
-                    <h1>Vehicle Photo Capture</h1>
-                    <button onClick={() => setStep(1)} className="btn btn-primary">Start</button>
+                    <h1>Captura de Fotos do Veículo</h1>
+                    <Button onClick={() => setStep(1)} className="btn btn-primary">
+                        Iniciar Captura
+                    </Button>
+                    <Button
+                        onClick={() => navigate('/cadastrar-veiculo')} // Navegar para o componente de cadastro
+                        className="btn btn-secondary mt-3"
+                    >
+                        Cadastrar Veículo
+                    </Button>
                 </div>
             )}
-            {step === 1 && <CameraCapture onCapture={handleCapture} onCancel={handleRestart} />}
-            {step === 2 && <PhotoSummary photos={photos} onRestart={handleRestart} />}
+            {step === 1 && (
+                <CameraCapture onCapture={handleCapture} onCancel={handleRestart} />
+            )}
+            {step === 2 && (
+                <PhotoSummary photos={photos} onRestart={handleRestart} />
+            )}
         </Container>
     );
 };
