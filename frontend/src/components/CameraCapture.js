@@ -1,9 +1,8 @@
-// src/components/CameraCapture.js
 import React, { useRef, useState, useEffect } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
 
-const CameraCapture = ({ onCapture, onCancel }) => {
+const CameraCapture = ({ onCapture, onCancel, step }) => {
     const videoRef = useRef(null);
     const [photo, setPhoto] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -44,10 +43,8 @@ const CameraCapture = ({ onCapture, onCancel }) => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            // Aqui você pode dar feedback de sucesso ao usuário
         } catch (error) {
             console.error('Erro ao fazer upload da foto:', error);
-            // Aqui você pode dar feedback de erro ao usuário
         }
     };
 
@@ -57,11 +54,18 @@ const CameraCapture = ({ onCapture, onCancel }) => {
         canvas.height = videoRef.current.videoHeight;
         const context = canvas.getContext('2d');
         context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const photo = canvas.toDataURL('image/jpeg');
-        setPhoto(photo);
+        const capturedPhoto = canvas.toDataURL('image/jpeg');
+        setPhoto(capturedPhoto);
         stopCamera(); // Para a câmera após capturar a foto
-        await uploadPhoto(photo); // Envia a foto para o backend
+        await uploadPhoto(capturedPhoto); // Envia a foto para o backend
+        setIsModalVisible(true); // Exibe o modal da foto capturada
+    };
+
+    const handleConfirm = () => {
         onCapture(photo); // Chama a função para passar a foto para o App
+        setPhoto(null); // Limpa a foto
+        setIsModalVisible(false); // Fecha o modal
+        startCamera(); // Reinicia a câmera para o próximo passo
     };
 
     return (
@@ -71,17 +75,18 @@ const CameraCapture = ({ onCapture, onCancel }) => {
                 <Button variant="primary" onClick={capturePhoto}>Capturar Foto</Button>
                 <Button variant="danger" onClick={onCancel}>Cancelar</Button>
             </div>
-            {/* Exibir a foto capturada em um modal se necessário */}
+            {/* Modal para exibir a foto capturada */}
             {photo && (
                 <Modal show={isModalVisible} onHide={() => setIsModalVisible(false)}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Foto Capturada</Modal.Title>
+                        <Modal.Title>Foto Capturada - Passo {step}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <img src={photo} alt="Captura" className="w-100" />
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setIsModalVisible(false)}>Fechar</Button>
+                        <Button variant="primary" onClick={handleConfirm}>Confirmar Foto</Button>
                     </Modal.Footer>
                 </Modal>
             )}

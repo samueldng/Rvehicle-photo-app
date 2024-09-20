@@ -1,9 +1,8 @@
-// src/components/PhotoSummary.js
 import React from 'react';
 import { Button, Alert } from 'react-bootstrap';
 
 const PhotoSummary = ({ photos, onRestart }) => {
-    const totalPhotosRequired = 6; // Ajuste se necessário
+    const totalPhotosRequired = 13; // Atualizado para 13 fotos no total
 
     return (
         <div className="text-center">

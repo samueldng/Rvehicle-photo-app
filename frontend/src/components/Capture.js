@@ -9,31 +9,31 @@ function Capture() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showTravelModal, setShowTravelModal] = useState(false);
+  const [isFirstPhoto, setIsFirstPhoto] = useState(true);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
   const instructions = [
-    "Tire a foto da frente do veículo",
-    "Tire a foto da lateral direita do veículo",
-    "Tire a foto da lateral esquerda do veículo",
-    "Tire a foto da traseira do veículo",
-    "Tire a foto do condutor e passageiro",
-    "Tire a foto dos km do veículo"
+    "Passo 1: Tire a foto da frente do veículo",
+    "Passo 1: Tire a foto da frente do veículo, mais próxima",
+    "Passo 2: Tire a foto da lateral direita do veículo",
+    "Passo 2: Tire a foto da lateral direita do veículo, mais próxima",
+    "Passo 3: Tire a foto da lateral esquerda do veículo",
+    "Passo 3: Tire a foto da lateral esquerda do veículo, mais próxima",
+    "Passo 4: Tire a foto da traseira do veículo",
+    "Passo 4: Tire a foto da traseira do veículo, mais próxima",
+    "Passo 5: Tire a foto do condutor e passageiro",
+    "Passo 5: Tire a foto do condutor e passageiro, mais próxima",
+    "Passo 6: Tire a foto dos km do veículo",
+    "Passo 6: Tire a foto dos km do veículo, mais próxima",
   ];
 
   const startCamera = async () => {
     try {
-      const constraints = {
-        video: { facingMode: { exact: 'environment' } }
-      };
+      const constraints = { video: { facingMode: { exact: 'environment' } } };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-      if (videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-      }
-
       videoRef.current.srcObject = stream;
 
       const playPromise = videoRef.current.play();
@@ -42,13 +42,11 @@ function Capture() {
           setLoading(false);
           setError(null);
         }).catch(err => {
-          console.error('Erro ao iniciar a reprodução do vídeo:', err);
           setError('Não foi possível iniciar a câmera. Verifique as permissões.');
           setLoading(false);
         });
       }
     } catch (err) {
-      console.error('Erro ao acessar a câmera:', err);
       setError('Não foi possível acessar a câmera. Verifique as permissões.');
       setLoading(false);
     }
@@ -68,11 +66,26 @@ function Capture() {
       setPhotos(updatedPhotos);
       setPhoto(null);
       setShowModal(false);
-      if (step < instructions.length) {
-        setStep(step + 1);
+
+      if (isFirstPhoto) {
+        setIsFirstPhoto(false);
       } else {
-        navigate('/review', { state: { photos: updatedPhotos } });
+        if (step < instructions.length / 2) {
+          setStep(step + 1);
+          setIsFirstPhoto(true);
+        } else {
+          setShowTravelModal(true);
+        }
       }
+    }
+  };
+
+  const handleTravelConfirmation = (willTravel) => {
+    setShowTravelModal(false);
+    if (willTravel) {
+      capturePhoto();
+    } else {
+      navigate('/review', { state: { photos } });
     }
   };
 
@@ -85,8 +98,9 @@ function Capture() {
   useEffect(() => {
     startCamera();
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
+      const videoElement = videoRef.current;
+      if (videoElement && videoElement.srcObject) {
+        const tracks = videoElement.srcObject.getTracks();
         tracks.forEach(track => track.stop());
       }
     };
@@ -94,7 +108,7 @@ function Capture() {
 
   return (
     <Container className="mt-5">
-      <h2 className="text-center mb-4">Passo {step}: {instructions[step - 1]}</h2>
+      <h2 className="text-center mb-4">{instructions[(step - 1) * 2 + (isFirstPhoto ? 0 : 1)]}</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Row className="justify-content-center">
         <Col xs={12} md={8} lg={6}>
@@ -102,13 +116,6 @@ function Capture() {
             <video
               ref={videoRef}
               className="w-100 h-auto border rounded-3 shadow-lg"
-              style={{ 
-                border: '4px solid transparent', 
-                borderRadius: '0.5rem', 
-                background: 'linear-gradient(135deg, #47018f, #ff5404)', 
-                padding: '2px', 
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              }}
               autoPlay
               playsInline
             ></video>
@@ -127,7 +134,7 @@ function Capture() {
                 className="mb-2 mb-md-0"
                 disabled={loading}
               >
-                Iniciar Câmera
+                Recarregar Câmera
               </Button>
               <Button
                 style={{ backgroundColor: '#ff5404', borderColor: '#ff5404' }}
@@ -151,7 +158,7 @@ function Capture() {
             src={photo} 
             alt="Captura" 
             className="img-fluid border border-gray-300 rounded mx-auto d-block" 
-            style={{ maxHeight: '400px', objectFit: 'contain' }} // Ajustes para dimensão
+            style={{ maxHeight: '400px', objectFit: 'contain' }} 
           />
         </Modal.Body>
         <Modal.Footer className="d-flex justify-content-between">
@@ -162,10 +169,28 @@ function Capture() {
             Confirmar Foto
           </Button>
           <Button
-            style={{ backgroundColor: '#69727d', borderColor: '#69727d' }} // Cor cinza
+            style={{ backgroundColor: '#69727d', borderColor: '#69727d' }}
             onClick={startNewCapture}
           >
             Tirar Foto Novamente
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal para confirmar se o veículo irá viajar */}
+      <Modal show={showTravelModal} onHide={() => setShowTravelModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title style={{ textAlign: 'center', width: '100%' }}>Informe:</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>O veículo irá viajar?</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => handleTravelConfirmation(false)}>
+            Não
+          </Button>
+          <Button variant="primary" onClick={() => handleTravelConfirmation(true)}>
+            Sim
           </Button>
         </Modal.Footer>
       </Modal>

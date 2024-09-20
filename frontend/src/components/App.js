@@ -13,8 +13,8 @@ const App = () => {
     const handleCapture = (photo) => {
         setPhotos((prevPhotos) => [...prevPhotos, photo]);
 
-        // Verifica se o número de fotos atingiu o limite de 6
-        if (photos.length + 1 >= 6) {
+        // Verifica se o número de fotos atingiu o limite de 13
+        if (photos.length + 1 >= 13) {
             setStep(2); // Mover para a tela de resumo
         } else {
             setStep(1); // Continuar tirando fotos

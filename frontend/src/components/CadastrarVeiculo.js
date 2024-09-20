@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useState, useEffect } from 'react'; 
 import { Button, Form, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,7 @@ const CadastrarVeiculo = () => {
   const [placa, setPlaca] = useState('');
   const [km, setKm] = useState('');
   const [ultimaRevisao, setUltimaRevisao] = useState('');
+  const [currentDateTime, setCurrentDateTime] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -23,6 +24,14 @@ const CadastrarVeiculo = () => {
     console.log('Veículo cadastrado:', veiculo);
     navigate('/'); // Redireciona para a página inicial após o cadastro
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      setCurrentDateTime(now.toLocaleString());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Container className="mt-5">
@@ -93,6 +102,11 @@ const CadastrarVeiculo = () => {
           Cadastrar Veículo
         </Button>
       </Form>
+
+      {/* Exibir Data e Hora abaixo do botão */}
+      <footer style={{ marginTop: '20px', textAlign: 'center', color: '#47018f', fontSize: '1rem', opacity: 0.7 }}>
+        {currentDateTime}
+      </footer>
     </Container>
   );
 };
