@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { Button, Form, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,18 +21,17 @@ const CadastrarVeiculo = () => {
     };
 
     console.log('Veículo cadastrado:', veiculo);
-    // Aqui você pode adicionar a lógica para salvar os dados do veículo, por exemplo, enviar para uma API
-
-    // Redirecionar após o cadastro
     navigate('/'); // Redireciona para a página inicial após o cadastro
   };
 
   return (
     <Container className="mt-5">
-      <h2 className="text-center mb-4">Cadastrar Veículo</h2>
-      <Form onSubmit={handleSubmit}>
+      <h2 className="text-center mb-4" style={{ color: '#ff5404', textShadow: '1px 1px 2px #000' }}>
+        Cadastro de Veículo
+      </h2>
+      <Form onSubmit={handleSubmit} className="bg-gradient p-4 rounded-3 shadow-sm" style={{ background: 'linear-gradient(135deg, #47018f, #ff5404)' }}>
         <Form.Group controlId="formMarca">
-          <Form.Label>Marca</Form.Label>
+          <Form.Label style={{ color: '#fff' }}>Marca</Form.Label>
           <Form.Control
             type="text"
             placeholder="Digite a marca do veículo"
@@ -43,7 +42,7 @@ const CadastrarVeiculo = () => {
         </Form.Group>
 
         <Form.Group controlId="formModelo">
-          <Form.Label>Modelo</Form.Label>
+          <Form.Label style={{ color: '#fff' }}>Modelo</Form.Label>
           <Form.Control
             type="text"
             placeholder="Digite o modelo do veículo"
@@ -54,7 +53,7 @@ const CadastrarVeiculo = () => {
         </Form.Group>
 
         <Form.Group controlId="formPlaca">
-          <Form.Label>Placa</Form.Label>
+          <Form.Label style={{ color: '#fff' }}>Placa</Form.Label>
           <Form.Control
             type="text"
             placeholder="Digite a placa do veículo"
@@ -65,7 +64,7 @@ const CadastrarVeiculo = () => {
         </Form.Group>
 
         <Form.Group controlId="formKm">
-          <Form.Label>Kilômetros Rodados</Form.Label>
+          <Form.Label style={{ color: '#fff' }}>Kilômetros Rodados</Form.Label>
           <Form.Control
             type="number"
             placeholder="Digite os km rodados"
@@ -76,7 +75,7 @@ const CadastrarVeiculo = () => {
         </Form.Group>
 
         <Form.Group controlId="formUltimaRevisao">
-          <Form.Label>Última Revisão (Data)</Form.Label>
+          <Form.Label style={{ color: '#fff' }}>Última Revisão (Data)</Form.Label>
           <Form.Control
             type="date"
             value={ultimaRevisao}
@@ -85,8 +84,13 @@ const CadastrarVeiculo = () => {
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit" className="mt-3 w-100">
-          Cadastrar
+        <Button 
+          variant="primary" 
+          type="submit" 
+          className="mt-3 w-100"
+          style={{ backgroundColor: '#47018f', borderColor: '#47018f', transition: '0.3s', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', fontSize: '1.2rem' }}
+        >
+          Cadastrar Veículo
         </Button>
       </Form>
     </Container>

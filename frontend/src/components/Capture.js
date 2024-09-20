@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button, Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import React, { useState, useRef, useEffect } from 'react'; 
+import { Button, Container, Row, Col, Spinner, Alert, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function Capture() {
@@ -8,6 +8,7 @@ function Capture() {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
@@ -24,13 +25,28 @@ function Capture() {
   const startCamera = async () => {
     try {
       const constraints = {
-        video: { facingMode: { exact: 'environment' } } // Preferir a câmera traseira
+        video: { facingMode: { exact: 'environment' } }
       };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      if (videoRef.current.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+
       videoRef.current.srcObject = stream;
-      videoRef.current.play();
-      setLoading(false);
-      setError(null); // Limpa qualquer erro anterior
+
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setLoading(false);
+          setError(null);
+        }).catch(err => {
+          console.error('Erro ao iniciar a reprodução do vídeo:', err);
+          setError('Não foi possível iniciar a câmera. Verifique as permissões.');
+          setLoading(false);
+        });
+      }
     } catch (err) {
       console.error('Erro ao acessar a câmera:', err);
       setError('Não foi possível acessar a câmera. Verifique as permissões.');
@@ -43,6 +59,7 @@ function Capture() {
     context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
     const photoURL = canvasRef.current.toDataURL('image/jpeg');
     setPhoto(photoURL);
+    setShowModal(true);
   };
 
   const savePhoto = () => {
@@ -50,6 +67,7 @@ function Capture() {
       const updatedPhotos = [...photos, photo];
       setPhotos(updatedPhotos);
       setPhoto(null);
+      setShowModal(false);
       if (step < instructions.length) {
         setStep(step + 1);
       } else {
@@ -60,6 +78,7 @@ function Capture() {
 
   const startNewCapture = () => {
     setPhoto(null);
+    setShowModal(false);
     startCamera();
   };
 
@@ -82,7 +101,14 @@ function Capture() {
           <div className="position-relative">
             <video
               ref={videoRef}
-              className="w-100 h-auto border border-dark"
+              className="w-100 h-auto border rounded-3 shadow-lg"
+              style={{ 
+                border: '4px solid transparent', 
+                borderRadius: '0.5rem', 
+                background: 'linear-gradient(135deg, #47018f, #ff5404)', 
+                padding: '2px', 
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+              }}
               autoPlay
               playsInline
             ></video>
@@ -95,22 +121,54 @@ function Capture() {
             </div>
           ) : (
             <div className="mt-3 d-flex flex-column flex-md-row justify-content-between">
-              <Button variant="secondary" onClick={startCamera} className="mb-2 mb-md-0" disabled={loading}>Iniciar Câmera</Button>
-              <Button variant="primary" onClick={capturePhoto} disabled={loading}>Capturar Foto</Button>
-            </div>
-          )}
-          {photo && (
-            <div className="mt-3 text-center">
-              <h3 className="text-lg font-semibold">Foto Capturada</h3>
-              <img src={photo} alt="Captura" className="img-fluid border border-gray-300" />
-              <div className="mt-2">
-                <Button variant="success" onClick={savePhoto} className="mr-2">Confirmar Foto</Button>
-                <Button variant="danger" onClick={startNewCapture}>Tirar Foto Novamente</Button>
-              </div>
+              <Button
+                style={{ backgroundColor: '#69727d', borderColor: '#69727d' }}
+                onClick={startCamera}
+                className="mb-2 mb-md-0"
+                disabled={loading}
+              >
+                Iniciar Câmera
+              </Button>
+              <Button
+                style={{ backgroundColor: '#ff5404', borderColor: '#ff5404' }}
+                onClick={capturePhoto}
+                disabled={loading}
+              >
+                Capturar Foto
+              </Button>
             </div>
           )}
         </Col>
       </Row>
+
+      {/* Modal para visualizar a foto capturada */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton style={{ backgroundColor: '#47018f', color: '#fff' }}>
+          <Modal.Title className="w-100 text-center">Foto Capturada</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          <img 
+            src={photo} 
+            alt="Captura" 
+            className="img-fluid border border-gray-300 rounded mx-auto d-block" 
+            style={{ maxHeight: '400px', objectFit: 'contain' }} // Ajustes para dimensão
+          />
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button
+            style={{ backgroundColor: '#ff5404', borderColor: '#ff5404' }}
+            onClick={savePhoto}
+          >
+            Confirmar Foto
+          </Button>
+          <Button
+            style={{ backgroundColor: '#69727d', borderColor: '#69727d' }} // Cor cinza
+            onClick={startNewCapture}
+          >
+            Tirar Foto Novamente
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
